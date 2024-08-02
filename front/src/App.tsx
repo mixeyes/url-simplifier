@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { ChangeEvent, FormEvent, useState } from "react";
+import "./App.css";
+import { simplifyAPI } from "./api/instance";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [fullUrl, setFullUrl] = useState<string>("");
+  const [shortUrl, setShortUrl] = useState<string>("");
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const data = await simplifyAPI({ fullUrl });
+      setShortUrl(() => data.shortUrl);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
+      <h1>URL simplifier</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <form onSubmit={onSubmit}>
+          <label htmlFor="url">
+            Insert full url here
+            <input
+              name="fullUrl"
+              type="text"
+              value={fullUrl}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setFullUrl(() => e.target.value)
+              }
+            />
+          </label>
+          <button>Shorten</button>
+          <h3>Short version of your url</h3>
+          <a href={shortUrl} target='_blank'>{shortUrl}</a>
+        </form>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

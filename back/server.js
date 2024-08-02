@@ -1,16 +1,26 @@
-import express from 'express';
+import express, { json } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-// import {UrlModel} from './models/urlModel';
+import router from './routes/shorter.js';
+import cors from 'cors';
 
-const PORT = process.env.PORT || 5000;
+dotenv.config();
+
+const { env } = process;
+const PORT = env.PORT || 5050;
+const origins = env.ORIGINS || 'http://localhost:3000'
+
 const app = express();
+app.use(cors({ origin: origins }))
+app.use(express.urlencoded({ extended: false }));
+app.use(json());
+app.set('view engine', 'ejs');
 
 // Function to connect to the MongoDB database
 const connectDB = async () => {
     try {
         // mongodb connection string
-        await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(env.MONGO_URI);
         console.log('mongoDB connected.');
     } catch (err) {
         console.log(err);
@@ -19,18 +29,11 @@ const connectDB = async () => {
 };
 
 // connect to mongoDB
-// connectDB();
+connectDB();
 
-// Set EJS as the view engine
-app.set('view engine', 'ejs');
+app.use(router);
 
-// Middleware for handling JSON, URL-encoded data, and serving static files
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static('public'));
-
-
-// start the server and listen on PORT 7000
+// start the server and listen on PORT
 app.listen(PORT, () => {
     console.log(`App running on port ${PORT}...`);
 });
